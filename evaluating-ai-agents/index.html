@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Evaluating AI Agents Notes</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: single narrow reading column; header, facts strip, learning goals, trackable syllabus, eval map, notes. */
+:root{
+  --bg:#f3f5f7; --surface:#ffffff; --fg:#14202b; --muted:#5a6b7a; --line:#d8dfe5;
+  --accent:#0b6e5f; --accent-soft:#dff1ed; --lab:#b4531a; --lab-soft:#fbe9dc;
+  --f-display:'Bricolage Grotesque','Segoe UI',system-ui,sans-serif;
+  --f-body:'IBM Plex Sans','Segoe UI',system-ui,sans-serif;
+  --f-mono:'IBM Plex Mono',ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0f1820; --surface:#16222d; --fg:#e6edf2; --muted:#93a4b3; --line:#27384a;
+  --accent:#4fd1b8; --accent-soft:#12372f; --lab:#f0975a; --lab-soft:#3a2417; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0f1820; --surface:#16222d; --fg:#e6edf2; --muted:#93a4b3; --line:#27384a;
+  --accent:#4fd1b8; --accent-soft:#12372f; --lab:#f0975a; --lab-soft:#3a2417; color-scheme:dark}
+body{background:var(--bg);color:var(--fg);font-family:var(--f-body);font-size:16px;line-height:1.55;padding-inline:16px;padding-block:32px 56px}
+.wrap{max-width:760px;margin-inline:auto;display:flex;flex-direction:column;gap:40px}
+a{color:var(--accent)}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.eyebrow{font-family:var(--f-mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+h1{font-family:var(--f-display);font-size:clamp(2rem,6vw,3.1rem);line-height:1.05;margin:8px 0 12px;text-wrap:balance}
+h2{font-family:var(--f-display);font-size:1.4rem;margin:0 0 14px}
+.lede{color:var(--muted);max-width:60ch;margin:0}
+.facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:6px;overflow:hidden}
+.facts div{background:var(--surface);padding:12px 14px;min-width:0}
+.facts dt{font-family:var(--f-mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.facts dd{margin:2px 0 0;font-weight:600}
+.goals{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:10px}
+.goals li{padding-left:22px;position:relative}
+.goals li::before{content:"";position:absolute;left:2px;top:.62em;width:8px;height:8px;background:var(--accent);border-radius:50%}
+.prog{display:flex;align-items:center;gap:12px;margin-bottom:14px;font-family:var(--f-mono);font-size:13px;color:var(--muted)}
+.bar{flex:1;height:8px;background:var(--line);border-radius:4px;overflow:hidden}
+.bar i{display:block;height:100%;width:0;background:var(--accent);transition:width .25s}
+.lessons{list-style:none;margin:0;padding:0;border:1px solid var(--line);border-radius:6px;background:var(--surface);overflow:hidden}
+.lessons li+li{border-top:1px solid var(--line)}
+.lessons label{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center;padding:11px 14px;cursor:pointer;min-width:0}
+.lessons input{width:18px;height:18px;accent-color:var(--accent);margin:0}
+.t{min-width:0}
+.tag{font-family:var(--f-mono);font-size:11px;letter-spacing:.05em;text-transform:uppercase;padding:2px 6px;border-radius:3px;margin-right:8px;background:var(--accent-soft);color:var(--accent)}
+.tag.lab{background:var(--lab-soft);color:var(--lab)}
+.min{font-family:var(--f-mono);font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums}
+.lessons input:checked ~ .t{color:var(--muted);text-decoration:line-through;text-decoration-color:var(--line)}
+.note{font-size:13px;color:var(--muted);margin:10px 0 0}
+.flow{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px}
+.flow div{border:1px solid var(--line);background:var(--surface);border-radius:6px;padding:14px}
+.flow b{display:block;font-family:var(--f-display);margin-bottom:4px}
+.flow span{font-size:14px;color:var(--muted)}
+textarea{width:100%;min-height:160px;box-sizing:border-box;resize:vertical;font:inherit;color:var(--fg);background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:12px}
+.link{display:inline-block;margin-top:14px;font-weight:600}
+</style>
+
+<style>body{margin:0}.back{font-family:var(--f-mono);font-size:13px;text-decoration:none}</style>
+</head><body>
+<main class="wrap">
+  <header>
+    <a class="back" href="../">&larr; All courses</a>
+    <div class="eyebrow">DeepLearning.AI &times; Arize AI &middot; Short course</div>
+    <h1>Evaluating AI Agents</h1>
+    <p class="lede">Learn to trace an agent, test each of its parts, and watch it in production. Planned study notes and progress tracker.</p>
+    <a class="link" href="https://www.deeplearning.ai/courses/evaluating-ai-agents" target="_blank" rel="noopener">Open the course &rarr;</a>
+  </header>
+
+  <dl class="facts">
+    <div><dt>Instructors</dt><dd>John Gilhuly, Aman Khan</dd></div>
+    <div><dt>Length</dt><dd>2 h 36 min</dd></div>
+    <div><dt>Level</dt><dd>Beginner</dd></div>
+    <div><dt>Prereq</dt><dd>Basic Python</dd></div>
+    <div><dt>Cost</dt><dd>Free (beta)</dd></div>
+  </dl>
+
+  <section>
+    <h2>What I will learn</h2>
+    <ul class="goals">
+      <li>Add observability to an agent so each decision step can be debugged.</li>
+      <li>Tell apart evaluating LLM systems and evaluating traditional software.</li>
+      <li>Design component-level evals with code-based checks and LLM-as-a-Judge.</li>
+      <li>Run structured experiments to improve agent performance.</li>
+      <li>Monitor agent behavior in production.</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>Syllabus</h2>
+    <div class="prog"><span id="count">0 / 15</span><div class="bar"><i id="fill"></i></div><span id="mins">0 / 128 min</span></div>
+    <ol class="lessons" id="lessons"></ol>
+    <p class="note">Lesson times add up to 128 min; the course page lists 2 h 36 min in total. It also includes a graded assignment, a quiz and 6 code examples.</p>
+  </section>
+
+  <section>
+    <h2>Where evals attach to an agent</h2>
+    <div class="flow">
+      <div><b>Router</b><span>Did it pick the right skill or tool for the request?</span></div>
+      <div><b>Skills</b><span>Does each tool call return correct output? Code checks and LLM judges.</span></div>
+      <div><b>Trajectory</b><span>Did the full path of steps reach the answer efficiently?</span></div>
+      <div><b>Production</b><span>Monitor traces over time and feed failures back into experiments.</span></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>My notes</h2>
+    <textarea id="notes" aria-label="My notes" placeholder="Key ideas, questions, things to try..."></textarea>
+    <p class="note">Notes and progress are saved in this browser only.</p>
+  </section>
+</main>
+
+<script>
+const L=[["Introduction",3],["Evaluation in the Time of LLMs",7],["Decomposing Agents",6],["Lab 1: Building Your Agent",16,1],["Tracing Agents",4],["Lab 2: Tracing Your Agent",16,1],["Adding Router and Skill Evaluations",12],["Lab 3: Adding Router and Skill Evaluations",17,1],["Adding Trajectory Evaluations",5],["Lab 4: Adding Trajectory Evaluations",9,1],["Adding Structure to Evaluations",7],["Lab 5: Adding Structure to Evaluations",15,1],["Improving Your LLM-as-a-Judge",4],["Monitoring Agents",6],["Conclusion",1]];
+const total=L.reduce((a,l)=>a+l[1],0);
+let st=[];
+try{st=JSON.parse(localStorage.getItem("eaa-done")||"[]")}catch(e){}
+const ol=document.getElementById("lessons");
+L.forEach((l,i)=>{
+  const li=document.createElement("li");
+  const lab=document.createElement("label");
+  lab.innerHTML='<input type="checkbox" id="l'+i+'"><span class="t"><span class="tag'+(l[2]?' lab':'')+'">'+(l[2]?'Lab':'Video')+'</span>'+l[0]+'</span><span class="min">'+l[1]+' min</span>';
+  const cb=lab.querySelector("input");cb.checked=!!st[i];
+  cb.addEventListener("change",()=>{st[i]=cb.checked;try{localStorage.setItem("eaa-done",JSON.stringify(st))}catch(e){}upd()});
+  li.appendChild(lab);ol.appendChild(li);
+});
+function upd(){
+  let n=0,m=0;L.forEach((l,i)=>{if(st[i]){n++;m+=l[1]}});
+  document.getElementById("count").textContent=n+" / "+L.length;
+  document.getElementById("mins").textContent=m+" / "+total+" min";
+  document.getElementById("fill").style.width=(m/total*100)+"%";
+}
+upd();
+const ta=document.getElementById("notes");
+try{ta.value=localStorage.getItem("eaa-notes")||""}catch(e){}
+ta.addEventListener("input",()=>{try{localStorage.setItem("eaa-notes",ta.value)}catch(e){}});
+</script>
+</body></html>

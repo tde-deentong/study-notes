@@ -1,0 +1,804 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>11-768 AI Agents Notes</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:wght@400..700&family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+:root{color-scheme:dark}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0;background:#0d141b;color:#e9edf1;font-family:'IBM Plex Sans',system-ui,sans-serif}
+.app{height:100%;display:flex;flex-direction:column}
+.bar{display:flex;align-items:center;gap:10px;padding:10px 16px;border-bottom:1px solid #223140;flex-wrap:wrap}
+.bar a{color:#F0A070;text-decoration:none;font-size:14px;margin-right:auto;white-space:nowrap}
+.bar select,.bar button{font:inherit;font-size:14px;color:#e9edf1;background:#16202B;border:1px solid #33414F;border-radius:6px;padding:6px 10px;cursor:pointer;min-width:0}
+.bar select{max-width:min(46vw,380px)}
+.bar button:hover,.bar select:hover{border-color:#F0A070}
+:focus-visible{outline:2px solid #F0A070;outline-offset:2px}
+.count{font-family:'JetBrains Mono',monospace;font-size:13px;color:#93a4b3;min-width:64px;text-align:center}
+.stagewrap{flex:1;min-height:0;display:flex;align-items:center;justify-content:center;padding:12px;overflow:hidden}
+.frame{position:relative;box-shadow:0 8px 40px rgba(0,0,0,.45)}
+#deck{position:absolute;left:0;top:0;width:1920px;height:1080px;transform-origin:0 0;overflow:hidden}
+#deck section:not(.on){display:none!important}
+#deck section{position:absolute;inset:0;width:1920px;height:1080px;overflow:hidden;margin:0}
+
+#deck section[style*="display:grid"]{}
+#deck section aside{display:none}
+#deck p,#deck h1,#deck h2,#deck h3{margin:0}
+#deck hr{margin:0;border:0}
+#deck table{width:100%;border-collapse:collapse}
+#deck th,#deck td{padding:20px 24px 20px 0;border-top:1px solid #CFC7B5;vertical-align:top;text-align:left}
+#deck tr:last-child td{border-bottom:1px solid #CFC7B5}
+.notes{padding:10px 16px;border-top:1px solid #223140;font-size:15px;line-height:1.5;color:#B9C4CF;min-height:3.2em;max-height:22vh;overflow:auto}
+.notes[hidden]{display:none}
+@media (max-width:560px){.bar button.fs{display:none}}
+</style></head>
+<body><div class="app">
+<div class="bar">
+<a href="../">&larr; All courses</a>
+<select id="jump" aria-label="Jump to slide"><option value="0">1. AI Agents</option><option value="1">2. Course map</option><option value="2">3. The core loop</option><option value="3">4. Assignments</option><option value="4">5. Four questions for every lecture</option><option value="5">6. Agent capabilities</option><option value="6">7. Tools are the agent&#x27;s hands</option><option value="7">8. The window is finite and expensive</option><option value="8">9. Skills and memory</option><option value="9">10. Interleave or plan first?</option><option value="10">11. Discussion</option><option value="11">12. Application domains</option><option value="12">13. Coding agents</option><option value="13">14. GUI agents</option><option value="14">15. Research agents</option><option value="15">16. Check claims against sources, not against the agent&#x27;s own summary.</option><option value="16">17. Supervised fine-tuning</option><option value="17">18. Discussion</option><option value="18">19. Reinforcement learning</option><option value="19">20. Fundamentals</option><option value="20">21. Rewards for agents</option><option value="21">22. Practical issues</option><option value="22">23. Assignment 3</option><option value="23">24. Discussion</option><option value="24">25. Safety, sandboxing, frameworks</option><option value="25">26. Why sandbox agents</option><option value="26">27. Threats</option><option value="27">28. Mitigations</option><option value="28">29. Frameworks</option><option value="29">30. Discussion</option><option value="30">31. Human-agent interaction and search</option><option value="31">32. Autonomy is a dial</option><option value="32">33. Search at test time</option><option value="33">34. Guest lectures</option><option value="34">35. Discussion</option></select>
+<button id="prev" aria-label="Previous slide">&larr;</button>
+<span class="count" id="count">1 / 35</span>
+<button id="next" aria-label="Next slide">&rarr;</button>
+<button id="nbtn" aria-pressed="false" title="Toggle speaker notes (N)">Notes</button>
+<button id="fs" class="fs" title="Fullscreen (F)">Fullscreen</button>
+</div>
+<div class="stagewrap" id="sw"><div class="frame" id="frame"><div id="deck">
+<section id="cover" data-transition="fade" style="background:#16202B;color:#F6F3EC;font-family:'IBM Plex Sans', Arial, sans-serif;padding:128px;display:flex;flex-direction:column;justify-content:space-between;gap:48px">
+<svg aria-label="A loop with four steps, one highlighted" viewBox="0 0 560 560" width="560" height="560" style="position:absolute;right:128px;top:260px;width:560px;height:560px">
+<circle cx="280" cy="280" r="220" fill="none" stroke="#33414F" stroke-width="3"/>
+<polygon points="445.5,134.3 421.4,124.4 435.6,110.2" fill="#5F7284"/>
+<polygon points="445.5,134.3 421.4,124.4 435.6,110.2" fill="#5F7284" transform="rotate(90 280 280)"/>
+<polygon points="445.5,134.3 421.4,124.4 435.6,110.2" fill="#5F7284" transform="rotate(180 280 280)"/>
+<polygon points="445.5,134.3 421.4,124.4 435.6,110.2" fill="#5F7284" transform="rotate(270 280 280)"/>
+<circle cx="280" cy="60" r="22" fill="#F0A070"/>
+<circle cx="500" cy="280" r="18" fill="#16202B" stroke="#B9C4CF" stroke-width="3"/>
+<circle cx="280" cy="500" r="18" fill="#16202B" stroke="#B9C4CF" stroke-width="3"/>
+<circle cx="60" cy="280" r="18" fill="#16202B" stroke="#B9C4CF" stroke-width="3"/>
+</svg>
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;font-weight:500;letter-spacing:2px;text-transform:uppercase;color:#F0A070">Study notes · Fall 2026</p>
+<div style="display:flex;flex-direction:column;gap:32px">
+<h1 style="font-family:'Source Serif 4', Georgia, serif;font-size:120px;font-weight:600;line-height:1.05">AI Agents</h1>
+<hr style="width:160px;align-self:start;border-top:6px solid #F0A070">
+<p style="font-size:40px;line-height:1.3;color:#F6F3EC">CMU 11-768 · Language Technologies Institute</p>
+<p style="font-size:32px;line-height:1.4;color:#B9C4CF">Course taught by Graham Neubig and Daniel Fried</p>
+</div>
+</section>
+<section id="map" data-transition="fade" style="background:#F6F3EC;color:#16202B;font-family:'IBM Plex Sans', Arial, sans-serif;padding:128px;display:flex;flex-direction:column;gap:48px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;font-weight:500;letter-spacing:2px;text-transform:uppercase;color:#B5411A">Overview</p>
+<h2 style="font-family:'Source Serif 4', Georgia, serif;font-size:72px;font-weight:600;line-height:1.1">Course map</h2>
+</div>
+<div style="display:flex;flex-direction:column">
+<div style="display:flex;gap:40px;align-items:baseline;padding:22px 0px;border-top:1px solid #CFC7B5">
+<p style="width:64px;font-family:'JetBrains Mono', 'Courier New', monospace;font-size:32px;font-weight:500;color:#B5411A">1</p>
+<h3 style="width:600px;font-size:40px;font-weight:600;line-height:1.2">Capabilities</h3>
+<p style="flex:1;font-size:32px;line-height:1.4;color:#44505C">Tool use, context, skills and memory, planning</p>
+</div>
+<div style="display:flex;gap:40px;align-items:baseline;padding:22px 0px;border-top:1px solid #CFC7B5">
+<p style="width:64px;font-family:'JetBrains Mono', 'Courier New', monospace;font-size:32px;font-weight:500;color:#B5411A">2</p>
+<h3 style="width:600px;font-size:40px;font-weight:600;line-height:1.2">Applications</h3>
+<p style="flex:1;font-size:32px;line-height:1.4;color:#44505C">Coding, GUI, research agents, SFT</p>
+</div>
+<div style="display:flex;gap:40px;align-items:baseline;padding:22px 0px;border-top:1px solid #CFC7B5">
+<p style="width:64px;font-family:'JetBrains Mono', 'Courier New', monospace;font-size:32px;font-weight:500;color:#B5411A">3</p>
+<h3 style="width:600px;font-size:40px;font-weight:600;line-height:1.2">Reinforcement learning</h3>
+<p style="flex:1;font-size:32px;line-height:1.4;color:#44505C">RL fundamentals and advanced techniques</p>
+</div>
+<div style="display:flex;gap:40px;align-items:baseline;padding:22px 0px;border-top:1px solid #CFC7B5">
+<p style="width:64px;font-family:'JetBrains Mono', 'Courier New', monospace;font-size:32px;font-weight:500;color:#B5411A">4</p>
+<h3 style="width:600px;font-size:40px;font-weight:600;line-height:1.2">Safety and frameworks</h3>
+<p style="flex:1;font-size:32px;line-height:1.4;color:#44505C">Sandboxing, OpenHands, LangGraph</p>
+</div>
+<div style="display:flex;gap:40px;align-items:baseline;padding:22px 0px;border-top:1px solid #CFC7B5;border-bottom:1px solid #CFC7B5">
+<p style="width:64px;font-family:'JetBrains Mono', 'Courier New', monospace;font-size:32px;font-weight:500;color:#B5411A">5</p>
+<h3 style="width:600px;font-size:40px;font-weight:600;line-height:1.2">Human-agent interaction and search</h3>
+<p style="flex:1;font-size:32px;line-height:1.4;color:#44505C">Autonomy levels, search methods, guest lectures</p>
+</div>
+</div>
+<aside>Five blocks: agent capabilities, application domains (with SFT), reinforcement learning, safety and frameworks, and human-agent interaction with search methods. The term runs Aug 25 to Dec 3.</aside>
+</section>
+<section id="loop" data-transition="fade" style="background:#F6F3EC;color:#16202B;font-family:'IBM Plex Sans', Arial, sans-serif;padding:128px;display:flex;flex-direction:column;gap:48px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;font-weight:500;letter-spacing:2px;text-transform:uppercase;color:#B5411A">Overview</p>
+<h2 style="font-family:'Source Serif 4', Georgia, serif;font-size:72px;font-weight:600;line-height:1.1">The core loop</h2>
+</div>
+<div style="display:flex;flex-direction:column;gap:24px">
+<p style="font-family:'Source Serif 4', Georgia, serif;font-size:40px;line-height:1.3">An agent is a model inside a loop.</p>
+<div style="display:flex;align-items:center;gap:20px">
+<p style="font-size:32px;white-space:nowrap;background:#FFFDF8;border:1px solid #CFC7B5;border-radius:12px;padding:20px 28px">Context</p>
+<span style="width:44px;height:22px;background:#5F6873;display:block;flex:none;clip-path:polygon(0 35%,60% 35%,60% 0,100% 50%,60% 100%,60% 65%,0 65%)"></span>
+<p style="font-size:32px;font-weight:600;white-space:nowrap;color:#B5411A;background:#FFFDF8;border:2px solid #B5411A;border-radius:12px;padding:20px 28px">Model proposes action</p>
+<span style="width:44px;height:22px;background:#5F6873;display:block;flex:none;clip-path:polygon(0 35%,60% 35%,60% 0,100% 50%,60% 100%,60% 65%,0 65%)"></span>
+<p style="font-size:32px;white-space:nowrap;background:#FFFDF8;border:1px solid #CFC7B5;border-radius:12px;padding:20px 28px">Tool runs</p>
+<span style="width:44px;height:22px;background:#5F6873;display:block;flex:none;clip-path:polygon(0 35%,60% 35%,60% 0,100% 50%,60% 100%,60% 65%,0 65%)"></span>
+<p style="font-size:32px;white-space:nowrap;background:#FFFDF8;border:1px solid #CFC7B5;border-radius:12px;padding:20px 28px">Observation</p>
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;white-space:nowrap;color:#5F6873">then repeat</p>
+</div>
+</div>
+<div style="display:flex;flex-direction:column">
+<p style="font-size:32px;line-height:1.4;padding:22px 0px;border-top:1px solid #CFC7B5">Most of the engineering is in the <b>harness</b>: prompts, tools, memory, limits, and error handling</p>
+<p style="font-size:32px;line-height:1.4;padding:22px 0px;border-top:1px solid #CFC7B5">The loop ends on a stop signal, a step limit, or a budget</p>
+<p style="font-size:32px;line-height:1.4;padding:22px 0px;border-top:1px solid #CFC7B5;border-bottom:1px solid #CFC7B5">Each part of the loop is a lever for evaluation and training</p>
+</div>
+<aside>The model reads its context, emits an action (usually a tool call), the environment returns an observation, and the loop continues until the task is done or a limit is hit.</aside>
+</section>
+<section id="assignments" data-transition="fade" style="background:#F6F3EC;color:#16202B;font-family:'IBM Plex Sans', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:48px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;font-weight:500;letter-spacing:2px;text-transform:uppercase;color:#B5411A">Overview</p>
+<h2 style="font-family:'Source Serif 4', Georgia, serif;font-size:72px;font-weight:600;line-height:1.1">Assignments</h2>
+</div>
+<table style="font-size:32px;color:#16202B">
+<tr style="background:#ECE7DB"><th style="width:28%;text-align:left;font-weight:600">Item</th><th style="width:72%;text-align:left;font-weight:600">What you build or do</th></tr>
+<tr><td>Assignment 1</td><td>ReAct agent harness in Python, then apply it to a chess bug, a SWE-bench patch, and a chess bot</td></tr>
+<tr><td>Assignment 2</td><td>Agent evaluations with LLM-as-judge and FAIL_TO_PASS metrics</td></tr>
+<tr><td>Assignment 3</td><td>Supervised fine-tuning and RL pipelines</td></tr>
+<tr><td>Team research project</td><td>Half the grade</td></tr>
+</table>
+<p style="position:absolute;left:128px;bottom:64px;width:1664px;font-size:24px;color:#5F6873">Per-assignment weights and due dates: confirm on the official course page.</p>
+<aside>Assignment 1 in full: prompt construction, a tool-call loop with error recovery and step limits, tool dispatch into a sandbox, skill discovery, and context compaction. Then apply it to a chess-app bug, a SWE-bench Django patch, and a chess bot.</aside>
+</section>
+<section id="questions" data-transition="fade" style="background:#F6F3EC;color:#16202B;font-family:'IBM Plex Sans', Arial, sans-serif;padding:128px;display:flex;flex-direction:column;gap:48px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;font-weight:500;letter-spacing:2px;text-transform:uppercase;color:#B5411A">Overview</p>
+<h2 style="font-family:'Source Serif 4', Georgia, serif;font-size:72px;font-weight:600;line-height:1.1">Four questions for every lecture</h2>
+</div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:32px">
+<div style="display:flex;flex-direction:column;gap:12px;background:#FFFDF8;padding:36px 40px;border:1px solid #DDD6C6;border-radius:16px">
+<h3 style="font-size:40px;font-weight:600;line-height:1.2;color:#1F5A8A">What is in the context?</h3>
+<p style="font-size:32px;line-height:1.35;color:#44505C">Every token competes for attention and cost</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:12px;background:#FFFDF8;padding:36px 40px;border:1px solid #DDD6C6;border-radius:16px">
+<h3 style="font-size:40px;font-weight:600;line-height:1.2;color:#1F5A8A">What can the agent touch?</h3>
+<p style="font-size:32px;line-height:1.35;color:#44505C">Tools decide the blast radius of a mistake</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:12px;background:#FFFDF8;padding:36px 40px;border:1px solid #DDD6C6;border-radius:16px">
+<h3 style="font-size:40px;font-weight:600;line-height:1.2;color:#1F5A8A">How do we know it works?</h3>
+<p style="font-size:32px;line-height:1.35;color:#44505C">Benchmarks, judges, and trajectory review each have blind spots</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:12px;background:#FFFDF8;padding:36px 40px;border:1px solid #DDD6C6;border-radius:16px">
+<h3 style="font-size:40px;font-weight:600;line-height:1.2;color:#1F5A8A">How is it trained?</h3>
+<p style="font-size:32px;line-height:1.35;color:#44505C">SFT on trajectories, RL on outcomes, and the reward-hacking risk that comes with both</p>
+</div>
+</div>
+<aside>Success on a benchmark is not the same as reliable behavior. Tools with side effects need sandboxing, permissions, and human checkpoints.</aside>
+</section>
+<section id="b1" data-transition="fade" style="background:#16202B;color:#F6F3EC;font-family:'IBM Plex Sans', Arial, sans-serif;padding:128px;display:flex;flex-direction:column;justify-content:space-between;gap:48px">
+<div style="display:flex;align-items:center;gap:40px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;font-weight:500;letter-spacing:2px;text-transform:uppercase;white-space:nowrap;color:#F0A070">Block 1 of 5</p>
+<div style="display:flex;gap:12px">
+<div style="width:96px;height:8px;background:#F0A070;border-radius:4px"></div>
+<div style="width:96px;height:8px;background:#33414F;border-radius:4px"></div>
+<div style="width:96px;height:8px;background:#33414F;border-radius:4px"></div>
+<div style="width:96px;height:8px;background:#33414F;border-radius:4px"></div>
+<div style="width:96px;height:8px;background:#33414F;border-radius:4px"></div>
+</div>
+</div>
+<div style="display:flex;flex-direction:column;gap:32px">
+<h1 style="font-family:'Source Serif 4', Georgia, serif;font-size:120px;font-weight:600;line-height:1.05">Agent capabilities</h1>
+<p style="font-size:40px;line-height:1.3;color:#B9C4CF">Tool use · context management · skills and memory · planning</p>
+</div>
+</section>
+<section id="tools" data-transition="fade" style="background:#F6F3EC;color:#16202B;font-family:'IBM Plex Sans', Arial, sans-serif;padding:128px;display:flex;flex-direction:column;gap:48px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;font-weight:500;letter-spacing:2px;text-transform:uppercase;color:#B5411A">Block 1 · Capabilities</p>
+<h2 style="font-family:'Source Serif 4', Georgia, serif;font-size:72px;font-weight:600;line-height:1.1">Tools are the agent's hands</h2>
+</div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:32px">
+<div style="display:flex;flex-direction:column;gap:12px;background:#FFFDF8;padding:36px 40px;border:1px solid #DDD6C6;border-radius:16px">
+<h3 style="font-size:40px;font-weight:600;line-height:1.2;color:#1F5A8A">Describe</h3>
+<p style="font-size:32px;line-height:1.35;color:#44505C">Name, description, and typed schema. The description changes how the model uses the tool.</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:12px;background:#FFFDF8;padding:36px 40px;border:1px solid #DDD6C6;border-radius:16px">
+<h3 style="font-size:40px;font-weight:600;line-height:1.2;color:#1F5A8A">Dispatch</h3>
+<p style="font-size:32px;line-height:1.35;color:#44505C">Parse the call, validate arguments, execute, and return the result.</p>
+</div>
+</div>
+<div style="display:flex;flex-direction:column">
+<p style="font-size:32px;line-height:1.4;padding:22px 0px;border-top:1px solid #CFC7B5">Return errors as observations, not crashes, so the model can recover</p>
+<p style="font-size:32px;line-height:1.4;padding:22px 0px;border-top:1px solid #CFC7B5;border-bottom:1px solid #CFC7B5">Cap retries per tool and per task</p>
+</div>
+<aside>Description quality often matters more than people expect. The result of a tool call goes back to the model as an observation.</aside>
+</section>
+<section id="context" data-transition="fade" style="background:#F6F3EC;color:#16202B;font-family:'IBM Plex Sans', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:48px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;font-weight:500;letter-spacing:2px;text-transform:uppercase;color:#B5411A">Block 1 · Capabilities</p>
+<h2 style="font-family:'Source Serif 4', Georgia, serif;font-size:72px;font-weight:600;line-height:1.1">The window is finite and expensive</h2>
+</div>
+<div style="display:flex;flex-direction:column">
+<div style="display:flex;gap:48px;padding:22px 0px;border-top:1px solid #CFC7B5">
+<h3 style="width:500px;font-size:32px;font-weight:600;line-height:1.4;color:#1F5A8A">Compaction</h3>
+<p style="flex:1;font-size:32px;line-height:1.4;color:#44505C">Summarize old turns when the window fills; keep goals, constraints, and open issues</p>
+</div>
+<div style="display:flex;gap:48px;padding:22px 0px;border-top:1px solid #CFC7B5">
+<h3 style="width:500px;font-size:32px;font-weight:600;line-height:1.4;color:#1F5A8A">Progressive disclosure</h3>
+<p style="flex:1;font-size:32px;line-height:1.4;color:#44505C">Show skill names and short descriptions first; load full text only when used</p>
+</div>
+<div style="display:flex;gap:48px;padding:22px 0px;border-top:1px solid #CFC7B5;border-bottom:1px solid #CFC7B5">
+<h3 style="width:500px;font-size:32px;font-weight:600;line-height:1.4;color:#1F5A8A">Retrieval</h3>
+<p style="flex:1;font-size:32px;line-height:1.4;color:#44505C">Pull in only the memory relevant to this step</p>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1664px;font-size:24px;color:#5F6873">Assignment 1 implements compaction and progressive disclosure.</p>
+<aside>Every token has a cost in latency and attention.</aside>
+</section>
+<section id="memory" data-transition="fade" style="background:#F6F3EC;color:#16202B;font-family:'IBM Plex Sans', Arial, sans-serif;padding:128px;display:flex;flex-direction:column;gap:48px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;font-weight:500;letter-spacing:2px;text-transform:uppercase;color:#B5411A">Block 1 · Capabilities</p>
+<h2 style="font-family:'Source Serif 4', Georgia, serif;font-size:72px;font-weight:600;line-height:1.1">Skills and memory</h2>
+</div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:32px">
+<div style="display:flex;flex-direction:column;gap:12px;background:#FFFDF8;padding:36px 40px;border:1px solid #DDD6C6;border-radius:16px">
+<h3 style="font-size:40px;font-weight:600;line-height:1.2;color:#1F5A8A">Skills</h3>
+<p style="font-size:32px;line-height:1.35;color:#44505C">Reusable procedures the agent loads on demand. Written once, used across tasks.</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:12px;background:#FFFDF8;padding:36px 40px;border:1px solid #DDD6C6;border-radius:16px">
+<h3 style="font-size:40px;font-weight:600;line-height:1.2;color:#1F5A8A">Memory</h3>
+<p style="font-size:32px;line-height:1.35;color:#44505C">Facts and past outcomes that persist across sessions. Needs rules for what to write, when to read, and when to delete.</p>
+</div>
+</div>
+<p style="font-family:'Source Serif 4', Georgia, serif;font-size:40px;line-height:1.3;padding:8px 0px 8px 32px;border-left:6px solid #B5411A">Stale memory is a silent failure: the agent acts confidently on outdated facts.</p>
+</section>
+<section id="planning" data-transition="fade" style="background:#F6F3EC;color:#16202B;font-family:'IBM Plex Sans', Arial, sans-serif;padding:128px;display:flex;flex-direction:column;gap:48px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;font-weight:500;letter-spacing:2px;text-transform:uppercase;color:#B5411A">Block 1 · Capabilities</p>
+<h2 style="font-family:'Source Serif 4', Georgia, serif;font-size:72px;font-weight:600;line-height:1.1">Interleave or plan first?</h2>
+</div>
+<div style="display:flex;flex-direction:column;gap:24px">
+<div style="display:flex;align-items:center;gap:20px">
+<h3 style="width:300px;font-size:32px;font-weight:600;line-height:1.4;color:#1F5A8A">Interleave</h3>
+<p style="font-size:32px;white-space:nowrap;background:#FFFDF8;border:1px solid #CFC7B5;border-radius:12px;padding:20px 28px">Think</p>
+<span style="width:44px;height:22px;background:#5F6873;display:block;flex:none;clip-path:polygon(0 35%,60% 35%,60% 0,100% 50%,60% 100%,60% 65%,0 65%)"></span>
+<p style="font-size:32px;font-weight:600;white-space:nowrap;color:#B5411A;background:#FFFDF8;border:2px solid #B5411A;border-radius:12px;padding:20px 28px">Act</p>
+<span style="width:44px;height:22px;background:#5F6873;display:block;flex:none;clip-path:polygon(0 35%,60% 35%,60% 0,100% 50%,60% 100%,60% 65%,0 65%)"></span>
+<p style="font-size:32px;white-space:nowrap;background:#FFFDF8;border:1px solid #CFC7B5;border-radius:12px;padding:20px 28px">Observe</p>
+</div>
+<div style="display:flex;align-items:center;gap:20px">
+<h3 style="width:300px;font-size:32px;font-weight:600;line-height:1.4;color:#1F5A8A">Plan first</h3>
+<p style="font-size:32px;white-space:nowrap;background:#FFFDF8;border:1px solid #CFC7B5;border-radius:12px;padding:20px 28px">Plan once</p>
+<span style="width:44px;height:22px;background:#5F6873;display:block;flex:none;clip-path:polygon(0 35%,60% 35%,60% 0,100% 50%,60% 100%,60% 65%,0 65%)"></span>
+<p style="font-size:32px;white-space:nowrap;background:#FFFDF8;border:1px solid #CFC7B5;border-radius:12px;padding:20px 28px">Execute</p>
+<span style="width:44px;height:22px;background:#5F6873;display:block;flex:none;clip-path:polygon(0 35%,60% 35%,60% 0,100% 50%,60% 100%,60% 65%,0 65%)"></span>
+<p style="font-size:32px;white-space:nowrap;background:#FFFDF8;border:1px solid #CFC7B5;border-radius:12px;padding:20px 28px">Replan if surprised</p>
+</div>
+</div>
+<div style="display:flex;flex-direction:column">
+<p style="font-size:32px;line-height:1.4;padding:22px 0px;border-top:1px solid #CFC7B5">Plan-first is easier to inspect, but brittle when the environment disagrees</p>
+<p style="font-size:32px;line-height:1.4;padding:22px 0px;border-top:1px solid #CFC7B5;border-bottom:1px solid #CFC7B5">Step limits and budget tracking stop runaway loops</p>
+</div>
+<aside>ReAct interleaves reasoning and acting step by step. Plan-then-execute separates a planning call from execution.</aside>
+</section>
+<section id="b1-discuss" data-transition="fade" style="background:#F6F3EC;color:#16202B;font-family:'IBM Plex Sans', Arial, sans-serif;padding:128px;display:flex;flex-direction:column;gap:48px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;font-weight:500;letter-spacing:2px;text-transform:uppercase;color:#B5411A">Block 1 · Capabilities</p>
+<h2 style="font-family:'Source Serif 4', Georgia, serif;font-size:72px;font-weight:600;line-height:1.1">Discussion</h2>
+</div>
+<div style="display:flex;flex-direction:column">
+<div style="display:flex;gap:40px;align-items:baseline;padding:32px 0px;border-top:1px solid #CFC7B5">
+<p style="width:64px;font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;font-weight:500;color:#B5411A">Q1</p>
+<p style="flex:1;font-family:'Source Serif 4', Georgia, serif;font-size:40px;line-height:1.25">Which parts of a harness would you test first, and how?</p>
+</div>
+<div style="display:flex;gap:40px;align-items:baseline;padding:32px 0px;border-top:1px solid #CFC7B5">
+<p style="width:64px;font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;font-weight:500;color:#B5411A">Q2</p>
+<p style="flex:1;font-family:'Source Serif 4', Georgia, serif;font-size:40px;line-height:1.25">When should memory be written by the agent versus a human?</p>
+</div>
+<div style="display:flex;gap:40px;align-items:baseline;padding:32px 0px;border-top:1px solid #CFC7B5;border-bottom:1px solid #CFC7B5">
+<p style="width:64px;font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;font-weight:500;color:#B5411A">Q3</p>
+<p style="flex:1;font-family:'Source Serif 4', Georgia, serif;font-size:40px;line-height:1.25">What is the cheapest way to detect a tool-call loop?</p>
+</div>
+</div>
+</section>
+<section id="b2" data-transition="fade" style="background:#16202B;color:#F6F3EC;font-family:'IBM Plex Sans', Arial, sans-serif;padding:128px;display:flex;flex-direction:column;justify-content:space-between;gap:48px">
+<div style="display:flex;align-items:center;gap:40px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;font-weight:500;letter-spacing:2px;text-transform:uppercase;white-space:nowrap;color:#F0A070">Block 2 of 5</p>
+<div style="display:flex;gap:12px">
+<div style="width:96px;height:8px;background:#F0A070;border-radius:4px"></div>
+<div style="width:96px;height:8px;background:#F0A070;border-radius:4px"></div>
+<div style="width:96px;height:8px;background:#33414F;border-radius:4px"></div>
+<div style="width:96px;height:8px;background:#33414F;border-radius:4px"></div>
+<div style="width:96px;height:8px;background:#33414F;border-radius:4px"></div>
+</div>
+</div>
+<div style="display:flex;flex-direction:column;gap:32px">
+<h1 style="font-family:'Source Serif 4', Georgia, serif;font-size:120px;font-weight:600;line-height:1.05">Application domains</h1>
+<p style="font-size:40px;line-height:1.3;color:#B9C4CF">Coding agents · GUI agents · research agents · supervised fine-tuning</p>
+</div>
+</section>
+<section id="coding" data-transition="fade" style="background:#F6F3EC;color:#16202B;font-family:'IBM Plex Sans', Arial, sans-serif;padding:128px;display:flex;flex-direction:column;gap:48px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;font-weight:500;letter-spacing:2px;text-transform:uppercase;color:#B5411A">Block 2 · Applications</p>
+<h2 style="font-family:'Source Serif 4', Georgia, serif;font-size:72px;font-weight:600;line-height:1.1">Coding agents</h2>
+</div>
+<div style="display:flex;align-items:center;gap:20px">
+<p style="font-size:32px;white-space:nowrap;background:#FFFDF8;border:1px solid #CFC7B5;border-radius:12px;padding:20px 28px">Read issue</p>
+<span style="width:44px;height:22px;background:#5F6873;display:block;flex:none;clip-path:polygon(0 35%,60% 35%,60% 0,100% 50%,60% 100%,60% 65%,0 65%)"></span>
+<p style="font-size:32px;white-space:nowrap;background:#FFFDF8;border:1px solid #CFC7B5;border-radius:12px;padding:20px 28px">Search and read code</p>
+<span style="width:44px;height:22px;background:#5F6873;display:block;flex:none;clip-path:polygon(0 35%,60% 35%,60% 0,100% 50%,60% 100%,60% 65%,0 65%)"></span>
+<p style="font-size:32px;white-space:nowrap;background:#FFFDF8;border:1px solid #CFC7B5;border-radius:12px;padding:20px 28px">Edit</p>
+<span style="width:44px;height:22px;background:#5F6873;display:block;flex:none;clip-path:polygon(0 35%,60% 35%,60% 0,100% 50%,60% 100%,60% 65%,0 65%)"></span>
+<p style="font-size:32px;font-weight:600;white-space:nowrap;color:#B5411A;background:#FFFDF8;border:2px solid #B5411A;border-radius:12px;padding:20px 28px">Run tests</p>
+</div>
+<div style="display:flex;flex-direction:column">
+<div style="display:flex;gap:48px;padding:22px 0px;border-top:1px solid #CFC7B5">
+<h3 style="width:500px;font-size:32px;font-weight:600;line-height:1.4;color:#1F5A8A">SWE-bench</h3>
+<p style="flex:1;font-size:32px;line-height:1.4;color:#44505C">Hidden tests must flip from failing to passing (FAIL_TO_PASS) without breaking the others (PASS_TO_PASS)</p>
+</div>
+<div style="display:flex;gap:48px;padding:22px 0px;border-top:1px solid #CFC7B5;border-bottom:1px solid #CFC7B5">
+<h3 style="width:500px;font-size:32px;font-weight:600;line-height:1.4;color:#1F5A8A">Failure modes</h3>
+<p style="flex:1;font-size:32px;line-height:1.4;color:#44505C">Patching the symptom, editing tests, losing track over long runs</p>
+</div>
+</div>
+<aside>Typical setup: a repository, a shell, file read and edit tools, and a test runner.</aside>
+</section>
+<section id="gui" data-transition="fade" style="background:#F6F3EC;color:#16202B;font-family:'IBM Plex Sans', Arial, sans-serif;padding:128px;display:flex;flex-direction:column;gap:48px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;font-weight:500;letter-spacing:2px;text-transform:uppercase;color:#B5411A">Block 2 · Applications</p>
+<h2 style="font-family:'Source Serif 4', Georgia, serif;font-size:72px;font-weight:600;line-height:1.1">GUI agents</h2>
+</div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:32px">
+<div style="display:flex;flex-direction:column;gap:12px;background:#FFFDF8;padding:36px 40px;border:1px solid #DDD6C6;border-radius:16px">
+<h3 style="font-size:40px;font-weight:600;line-height:1.2;color:#1F5A8A">Observe</h3>
+<p style="font-size:32px;line-height:1.35;color:#44505C">Screenshots or accessibility trees</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:12px;background:#FFFDF8;padding:36px 40px;border:1px solid #DDD6C6;border-radius:16px">
+<h3 style="font-size:40px;font-weight:600;line-height:1.2;color:#1F5A8A">Act</h3>
+<p style="font-size:32px;line-height:1.35;color:#44505C">Click, type, scroll</p>
+</div>
+</div>
+<div style="display:flex;flex-direction:column">
+<div style="display:flex;gap:48px;padding:22px 0px;border-top:1px solid #CFC7B5">
+<h3 style="width:500px;font-size:32px;font-weight:600;line-height:1.4;color:#1F5A8A">Grounding</h3>
+<p style="flex:1;font-size:32px;line-height:1.4;color:#44505C">Mapping "the blue Submit button" to a location on screen</p>
+</div>
+<div style="display:flex;gap:48px;padding:22px 0px;border-top:1px solid #CFC7B5;border-bottom:1px solid #CFC7B5">
+<h3 style="width:500px;font-size:32px;font-weight:600;line-height:1.4;color:#1F5A8A">Irreversible actions</h3>
+<p style="flex:1;font-size:32px;line-height:1.4;color:#44505C">Send, purchase, and delete need a human checkpoint</p>
+</div>
+</div>
+<aside>Key difficulties: grounding, long horizons, and irreversible actions.</aside>
+</section>
+<section id="research" data-transition="fade" style="background:#F6F3EC;color:#16202B;font-family:'IBM Plex Sans', Arial, sans-serif;padding:128px;display:flex;flex-direction:column;gap:48px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;font-weight:500;letter-spacing:2px;text-transform:uppercase;color:#B5411A">Block 2 · Applications</p>
+<h2 style="font-family:'Source Serif 4', Georgia, serif;font-size:72px;font-weight:600;line-height:1.1">Research agents</h2>
+</div>
+<p style="font-family:'Source Serif 4', Georgia, serif;font-size:40px;line-height:1.3">Iterative querying of the web or a corpus, with reading and note-taking between queries.</p>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:32px">
+<div style="display:flex;flex-direction:column;gap:12px;background:#FFFDF8;padding:36px 40px;border:1px solid #DDD6C6;border-radius:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;font-weight:500;letter-spacing:2px;text-transform:uppercase;color:#B5411A">Risk 1</p>
+<h3 style="font-size:40px;font-weight:600;line-height:1.2">A citation that does not say what the agent claims</h3>
+</div>
+<div style="display:flex;flex-direction:column;gap:12px;background:#FFFDF8;padding:36px 40px;border:1px solid #DDD6C6;border-radius:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;font-weight:500;letter-spacing:2px;text-transform:uppercase;color:#B5411A">Risk 2</p>
+<h3 style="font-size:40px;font-weight:600;line-height:1.2">Shallow coverage that looks thorough</h3>
+</div>
+</div>
+</section>
+<section id="sources" data-transition="fade" style="background:#B5411A;color:#F6F3EC;font-family:'IBM Plex Sans', Arial, sans-serif;padding:128px;display:flex;flex-direction:column;justify-content:space-between;gap:48px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;font-weight:500;letter-spacing:2px;text-transform:uppercase;color:#F6F3EC">Block 2 · Research agents</p>
+<h2 style="font-family:'Source Serif 4', Georgia, serif;font-size:120px;font-weight:600;line-height:1.05;color:#F6F3EC">Check claims against sources, not against the agent's own summary.</h2>
+</section>
+<section id="sft" data-transition="fade" style="background:#F6F3EC;color:#16202B;font-family:'IBM Plex Sans', Arial, sans-serif;padding:128px;display:flex;flex-direction:column;gap:48px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;font-weight:500;letter-spacing:2px;text-transform:uppercase;color:#B5411A">Block 2 · Applications</p>
+<h2 style="font-family:'Source Serif 4', Georgia, serif;font-size:72px;font-weight:600;line-height:1.1">Supervised fine-tuning</h2>
+</div>
+<div style="display:flex;align-items:center;gap:20px">
+<p style="font-size:32px;white-space:nowrap;background:#FFFDF8;border:1px solid #CFC7B5;border-radius:12px;padding:20px 28px">Collect successful runs</p>
+<span style="width:44px;height:22px;background:#5F6873;display:block;flex:none;clip-path:polygon(0 35%,60% 35%,60% 0,100% 50%,60% 100%,60% 65%,0 65%)"></span>
+<p style="font-size:32px;white-space:nowrap;background:#FFFDF8;border:1px solid #CFC7B5;border-radius:12px;padding:20px 28px">Filter</p>
+<span style="width:44px;height:22px;background:#5F6873;display:block;flex:none;clip-path:polygon(0 35%,60% 35%,60% 0,100% 50%,60% 100%,60% 65%,0 65%)"></span>
+<p style="font-size:32px;font-weight:600;white-space:nowrap;color:#B5411A;background:#FFFDF8;border:2px solid #B5411A;border-radius:12px;padding:20px 28px">Fine-tune on (state, action) pairs</p>
+</div>
+<div style="display:flex;flex-direction:column">
+<p style="font-size:32px;line-height:1.4;padding:22px 0px;border-top:1px solid #CFC7B5">Data quality and filtering often matter more than volume</p>
+<p style="font-size:32px;line-height:1.4;padding:22px 0px;border-top:1px solid #CFC7B5;border-bottom:1px solid #CFC7B5">Assignment 3 builds an SFT pipeline, then an RL pipeline</p>
+</div>
+<aside>Training data is successful trajectories (state, action, observation sequences) from strong models or humans.</aside>
+</section>
+<section id="b2-discuss" data-transition="fade" style="background:#F6F3EC;color:#16202B;font-family:'IBM Plex Sans', Arial, sans-serif;padding:128px;display:flex;flex-direction:column;gap:48px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;font-weight:500;letter-spacing:2px;text-transform:uppercase;color:#B5411A">Block 2 · Applications</p>
+<h2 style="font-family:'Source Serif 4', Georgia, serif;font-size:72px;font-weight:600;line-height:1.1">Discussion</h2>
+</div>
+<div style="display:flex;flex-direction:column">
+<div style="display:flex;gap:40px;align-items:baseline;padding:32px 0px;border-top:1px solid #CFC7B5">
+<p style="width:64px;font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;font-weight:500;color:#B5411A">Q1</p>
+<p style="flex:1;font-family:'Source Serif 4', Georgia, serif;font-size:40px;line-height:1.25">Coding has tests. What do GUI and research tasks have instead?</p>
+</div>
+<div style="display:flex;gap:40px;align-items:baseline;padding:32px 0px;border-top:1px solid #CFC7B5;border-bottom:1px solid #CFC7B5">
+<p style="width:64px;font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;font-weight:500;color:#B5411A">Q2</p>
+<p style="flex:1;font-family:'Source Serif 4', Georgia, serif;font-size:40px;line-height:1.25">What would a good trajectory filter look like?</p>
+</div>
+</div>
+</section>
+<section id="b3" data-transition="fade" style="background:#16202B;color:#F6F3EC;font-family:'IBM Plex Sans', Arial, sans-serif;padding:128px;display:flex;flex-direction:column;justify-content:space-between;gap:48px">
+<div style="display:flex;align-items:center;gap:40px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;font-weight:500;letter-spacing:2px;text-transform:uppercase;white-space:nowrap;color:#F0A070">Block 3 of 5</p>
+<div style="display:flex;gap:12px">
+<div style="width:96px;height:8px;background:#F0A070;border-radius:4px"></div>
+<div style="width:96px;height:8px;background:#F0A070;border-radius:4px"></div>
+<div style="width:96px;height:8px;background:#F0A070;border-radius:4px"></div>
+<div style="width:96px;height:8px;background:#33414F;border-radius:4px"></div>
+<div style="width:96px;height:8px;background:#33414F;border-radius:4px"></div>
+</div>
+</div>
+<div style="display:flex;flex-direction:column;gap:32px">
+<h1 style="font-family:'Source Serif 4', Georgia, serif;font-size:120px;font-weight:600;line-height:1.05">Reinforcement learning</h1>
+<p style="font-size:40px;line-height:1.3;color:#B9C4CF">RL fundamentals · advanced techniques for agents</p>
+</div>
+</section>
+<section id="rl-basics" data-transition="fade" style="background:#F6F3EC;color:#16202B;font-family:'IBM Plex Sans', Arial, sans-serif;padding:128px;display:flex;flex-direction:column;gap:48px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;font-weight:500;letter-spacing:2px;text-transform:uppercase;color:#B5411A">Block 3 · Reinforcement learning</p>
+<h2 style="font-family:'Source Serif 4', Georgia, serif;font-size:72px;font-weight:600;line-height:1.1">Fundamentals</h2>
+</div>
+<div style="display:flex;flex-direction:column">
+<div style="display:flex;gap:48px;padding:22px 0px;border-top:1px solid #CFC7B5">
+<h3 style="width:500px;font-size:32px;font-weight:600;line-height:1.4;color:#1F5A8A">MDP view</h3>
+<p style="flex:1;font-size:32px;line-height:1.4;color:#44505C">State, action, reward, transition, discount. An agent episode is a trajectory of these.</p>
+</div>
+<div style="display:flex;gap:48px;padding:22px 0px;border-top:1px solid #CFC7B5">
+<h3 style="width:500px;font-size:32px;font-weight:600;line-height:1.4;color:#1F5A8A">Policy gradient</h3>
+<p style="flex:1;font-size:32px;line-height:1.4;color:#44505C">Increase the probability of actions that appear in high-return trajectories</p>
+</div>
+<div style="display:flex;gap:48px;padding:22px 0px;border-top:1px solid #CFC7B5">
+<h3 style="width:500px;font-size:32px;font-weight:600;line-height:1.4;color:#1F5A8A">Advantage</h3>
+<p style="flex:1;font-size:32px;line-height:1.4;color:#44505C">Reward minus a baseline, which reduces variance</p>
+</div>
+<div style="display:flex;gap:48px;padding:22px 0px;border-top:1px solid #CFC7B5;border-bottom:1px solid #CFC7B5">
+<h3 style="width:500px;font-size:32px;font-weight:600;line-height:1.4;color:#1F5A8A">KL regularization</h3>
+<p style="flex:1;font-size:32px;line-height:1.4;color:#44505C">Keep the trained policy close to a reference model to prevent drift</p>
+</div>
+</div>
+<aside>KL regularization also guards against degenerate outputs, not only drift.</aside>
+</section>
+<section id="rewards" data-transition="fade" style="background:#F6F3EC;color:#16202B;font-family:'IBM Plex Sans', Arial, sans-serif;padding:128px;display:flex;flex-direction:column;gap:48px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;font-weight:500;letter-spacing:2px;text-transform:uppercase;color:#B5411A">Block 3 · Reinforcement learning</p>
+<h2 style="font-family:'Source Serif 4', Georgia, serif;font-size:72px;font-weight:600;line-height:1.1">Rewards for agents</h2>
+</div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:32px">
+<div style="display:flex;flex-direction:column;gap:12px;background:#FFFDF8;padding:36px 40px;border:1px solid #DDD6C6;border-radius:16px">
+<h3 style="font-size:40px;font-weight:600;line-height:1.2;color:#1F5A8A">Verifiable rewards</h3>
+<p style="font-size:32px;line-height:1.35;color:#44505C">Tests pass, exact-match answer, game outcome. The cleanest signal.</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:12px;background:#FFFDF8;padding:36px 40px;border:1px solid #DDD6C6;border-radius:16px">
+<h3 style="font-size:40px;font-weight:600;line-height:1.2;color:#1F5A8A">LLM-as-judge rewards</h3>
+<p style="font-size:32px;line-height:1.35;color:#44505C">Cheaper to obtain, but exploitable.</p>
+</div>
+</div>
+<p style="font-family:'Source Serif 4', Georgia, serif;font-size:40px;line-height:1.3;padding:8px 0px 8px 32px;border-left:6px solid #B5411A"><b>Reward hacking:</b> the policy scores well without solving the task, such as special-casing tests or exploiting the grader.</p>
+</section>
+<section id="rl-practice" data-transition="fade" style="background:#F6F3EC;color:#16202B;font-family:'IBM Plex Sans', Arial, sans-serif;padding:128px;display:flex;flex-direction:column;gap:48px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;font-weight:500;letter-spacing:2px;text-transform:uppercase;color:#B5411A">Block 3 · Reinforcement learning</p>
+<h2 style="font-family:'Source Serif 4', Georgia, serif;font-size:72px;font-weight:600;line-height:1.1">Practical issues</h2>
+</div>
+<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:32px">
+<div style="display:flex;flex-direction:column;gap:12px;background:#FFFDF8;padding:36px 32px;border:1px solid #DDD6C6;border-radius:16px">
+<h3 style="font-size:40px;font-weight:600;line-height:1.2;color:#1F5A8A">Credit assignment</h3>
+<p style="font-size:32px;line-height:1.35;color:#44505C">Over 50 actions, which one mattered?</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:12px;background:#FFFDF8;padding:36px 32px;border:1px solid #DDD6C6;border-radius:16px">
+<h3 style="font-size:40px;font-weight:600;line-height:1.2;color:#1F5A8A">Sparse rewards</h3>
+<p style="font-size:32px;line-height:1.35;color:#44505C">Most trajectories fail, so the learning signal is thin</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:12px;background:#FFFDF8;padding:36px 32px;border:1px solid #DDD6C6;border-radius:16px">
+<h3 style="font-size:40px;font-weight:600;line-height:1.2;color:#1F5A8A">Sampling cost</h3>
+<p style="font-size:32px;line-height:1.35;color:#44505C">Every rollout runs tools in an environment</p>
+</div>
+</div>
+</section>
+<section id="a3" data-transition="fade" style="background:#F6F3EC;color:#16202B;font-family:'IBM Plex Sans', Arial, sans-serif;padding:128px;display:flex;flex-direction:column;gap:48px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;font-weight:500;letter-spacing:2px;text-transform:uppercase;color:#B5411A">Block 3 · Reinforcement learning</p>
+<h2 style="font-family:'Source Serif 4', Georgia, serif;font-size:72px;font-weight:600;line-height:1.1">Assignment 3</h2>
+</div>
+<p style="font-size:32px;line-height:1.4;color:#44505C">Build a supervised fine-tuning pipeline and an RL pipeline. For each one, write down:</p>
+<div style="display:flex;flex-direction:column">
+<div style="display:flex;gap:40px;align-items:baseline;padding:32px 0px;border-top:1px solid #CFC7B5">
+<p style="width:64px;font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;font-weight:500;color:#B5411A">1</p>
+<p style="flex:1;font-family:'Source Serif 4', Georgia, serif;font-size:40px;line-height:1.25">The reward definition</p>
+</div>
+<div style="display:flex;gap:40px;align-items:baseline;padding:32px 0px;border-top:1px solid #CFC7B5">
+<p style="width:64px;font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;font-weight:500;color:#B5411A">2</p>
+<p style="flex:1;font-family:'Source Serif 4', Georgia, serif;font-size:40px;line-height:1.25">The rollout environment</p>
+</div>
+<div style="display:flex;gap:40px;align-items:baseline;padding:32px 0px;border-top:1px solid #CFC7B5;border-bottom:1px solid #CFC7B5">
+<p style="width:64px;font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;font-weight:500;color:#B5411A">3</p>
+<p style="flex:1;font-family:'Source Serif 4', Georgia, serif;font-size:40px;line-height:1.25">The evaluation split</p>
+</div>
+</div>
+</section>
+<section id="b3-discuss" data-transition="fade" style="background:#F6F3EC;color:#16202B;font-family:'IBM Plex Sans', Arial, sans-serif;padding:128px;display:flex;flex-direction:column;gap:48px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;font-weight:500;letter-spacing:2px;text-transform:uppercase;color:#B5411A">Block 3 · Reinforcement learning</p>
+<h2 style="font-family:'Source Serif 4', Georgia, serif;font-size:72px;font-weight:600;line-height:1.1">Discussion</h2>
+</div>
+<div style="display:flex;flex-direction:column">
+<div style="display:flex;gap:40px;align-items:baseline;padding:32px 0px;border-top:1px solid #CFC7B5">
+<p style="width:64px;font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;font-weight:500;color:#B5411A">Q1</p>
+<p style="flex:1;font-family:'Source Serif 4', Georgia, serif;font-size:40px;line-height:1.25">If a reward is verifiable, does that make hacking impossible?</p>
+</div>
+<div style="display:flex;gap:40px;align-items:baseline;padding:32px 0px;border-top:1px solid #CFC7B5;border-bottom:1px solid #CFC7B5">
+<p style="width:64px;font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;font-weight:500;color:#B5411A">Q2</p>
+<p style="flex:1;font-family:'Source Serif 4', Georgia, serif;font-size:40px;line-height:1.25">Where does the KL penalty help, and where does it get in the way?</p>
+</div>
+</div>
+</section>
+<section id="b4" data-transition="fade" style="background:#16202B;color:#F6F3EC;font-family:'IBM Plex Sans', Arial, sans-serif;padding:128px;display:flex;flex-direction:column;justify-content:space-between;gap:48px">
+<div style="display:flex;align-items:center;gap:40px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;font-weight:500;letter-spacing:2px;text-transform:uppercase;white-space:nowrap;color:#F0A070">Block 4 of 5</p>
+<div style="display:flex;gap:12px">
+<div style="width:96px;height:8px;background:#F0A070;border-radius:4px"></div>
+<div style="width:96px;height:8px;background:#F0A070;border-radius:4px"></div>
+<div style="width:96px;height:8px;background:#F0A070;border-radius:4px"></div>
+<div style="width:96px;height:8px;background:#F0A070;border-radius:4px"></div>
+<div style="width:96px;height:8px;background:#33414F;border-radius:4px"></div>
+</div>
+</div>
+<div style="display:flex;flex-direction:column;gap:32px">
+<h1 style="font-family:'Source Serif 4', Georgia, serif;font-size:120px;font-weight:600;line-height:1.05">Safety, sandboxing, frameworks</h1>
+<p style="font-size:40px;line-height:1.3;color:#B9C4CF">Sandboxing · permissions · OpenHands · LangGraph</p>
+</div>
+</section>
+<section id="sandbox" data-transition="fade" style="background:#F6F3EC;color:#16202B;font-family:'IBM Plex Sans', Arial, sans-serif;padding:128px;display:flex;flex-direction:column;gap:48px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;font-weight:500;letter-spacing:2px;text-transform:uppercase;color:#B5411A">Block 4 · Safety and frameworks</p>
+<h2 style="font-family:'Source Serif 4', Georgia, serif;font-size:72px;font-weight:600;line-height:1.1">Why sandbox agents</h2>
+</div>
+<div style="display:flex;flex-direction:column;gap:24px">
+<p style="font-family:'Source Serif 4', Georgia, serif;font-size:40px;line-height:1.3">Agents run code and tools with real side effects.</p>
+<div style="display:flex;align-items:center;gap:16px">
+<p style="font-size:32px;white-space:nowrap;background:#FFFDF8;border:1px solid #CFC7B5;border-radius:40px;padding:14px 28px">Deleting files</p>
+<p style="font-size:32px;white-space:nowrap;background:#FFFDF8;border:1px solid #CFC7B5;border-radius:40px;padding:14px 28px">Calling networks</p>
+<p style="font-size:32px;white-space:nowrap;background:#FFFDF8;border:1px solid #CFC7B5;border-radius:40px;padding:14px 28px">Spending money</p>
+<p style="font-size:32px;white-space:nowrap;background:#FFFDF8;border:1px solid #CFC7B5;border-radius:40px;padding:14px 28px">Sending messages</p>
+</div>
+</div>
+<div style="display:flex;flex-direction:column">
+<p style="font-size:32px;line-height:1.4;padding:22px 0px;border-top:1px solid #CFC7B5">Run untrusted code in isolated environments (containers or microVMs)</p>
+<p style="font-size:32px;line-height:1.4;padding:22px 0px;border-top:1px solid #CFC7B5">Limit network and filesystem access</p>
+<p style="font-size:32px;line-height:1.4;padding:22px 0px;border-top:1px solid #CFC7B5;border-bottom:1px solid #CFC7B5"><b>Least privilege:</b> give each tool only the permissions the task needs</p>
+</div>
+</section>
+<section id="threats" data-transition="fade" style="background:#F6F3EC;color:#16202B;font-family:'IBM Plex Sans', Arial, sans-serif;padding:128px;display:flex;flex-direction:column;gap:48px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;font-weight:500;letter-spacing:2px;text-transform:uppercase;color:#B5411A">Block 4 · Safety and frameworks</p>
+<h2 style="font-family:'Source Serif 4', Georgia, serif;font-size:72px;font-weight:600;line-height:1.1">Threats</h2>
+</div>
+<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:32px">
+<div style="display:flex;flex-direction:column;gap:12px;background:#FFFDF8;padding:36px 32px;border:1px solid #DDD6C6;border-radius:16px">
+<div style="display:flex;flex-direction:column;min-height:96px">
+<h3 style="font-size:40px;font-weight:600;line-height:1.2;color:#1F5A8A">Prompt injection</h3>
+</div>
+<p style="font-size:32px;line-height:1.35;color:#44505C">Instructions hidden in tool outputs, web pages, or files hijack the agent</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:12px;background:#FFFDF8;padding:36px 32px;border:1px solid #DDD6C6;border-radius:16px">
+<div style="display:flex;flex-direction:column;min-height:96px">
+<h3 style="font-size:40px;font-weight:600;line-height:1.2;color:#1F5A8A">Overreach</h3>
+</div>
+<p style="font-size:32px;line-height:1.35;color:#44505C">The agent takes a broader action than the user intended</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:12px;background:#FFFDF8;padding:36px 32px;border:1px solid #DDD6C6;border-radius:16px">
+<div style="display:flex;flex-direction:column;min-height:96px">
+<h3 style="font-size:40px;font-weight:600;line-height:1.2;color:#1F5A8A">Test or reward gaming</h3>
+</div>
+<p style="font-size:32px;line-height:1.35;color:#44505C">Covered in Block 3, with safety consequences here</p>
+</div>
+</div>
+</section>
+<section id="mitigations" data-transition="fade" style="background:#F6F3EC;color:#16202B;font-family:'IBM Plex Sans', Arial, sans-serif;padding:128px;display:flex;flex-direction:column;gap:48px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;font-weight:500;letter-spacing:2px;text-transform:uppercase;color:#B5411A">Block 4 · Safety and frameworks</p>
+<h2 style="font-family:'Source Serif 4', Georgia, serif;font-size:72px;font-weight:600;line-height:1.1">Mitigations</h2>
+</div>
+<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:32px">
+<div style="display:flex;flex-direction:column;gap:20px;background:#FFFDF8;padding:36px 32px;border:1px solid #DDD6C6;border-radius:16px">
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:#B5411A;width:56px;height:56px;flex:none" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+<h3 style="font-size:40px;font-weight:600;line-height:1.2;color:#1F5A8A">Human checkpoints</h3>
+<p style="font-size:32px;line-height:1.35;color:#44505C">Before irreversible actions</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:20px;background:#FFFDF8;padding:36px 32px;border:1px solid #DDD6C6;border-radius:16px">
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:#B5411A;width:56px;height:56px;flex:none" aria-hidden="true"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+<h3 style="font-size:40px;font-weight:600;line-height:1.2;color:#1F5A8A">Trust separation</h3>
+<p style="font-size:32px;line-height:1.35;color:#44505C">Keep trusted instructions separate from untrusted observations in the prompt</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:20px;background:#FFFDF8;padding:36px 32px;border:1px solid #DDD6C6;border-radius:16px">
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:#B5411A;width:56px;height:56px;flex:none" aria-hidden="true"><path d="M22 12h-2.48a2 2 0 0 0-1.93 1.46l-2.35 8.36a.25.25 0 0 1-.48 0L9.24 2.18a.25.25 0 0 0-.48 0l-2.35 8.36A2 2 0 0 1 4.49 12H2"/></svg>
+<h3 style="font-size:40px;font-weight:600;line-height:1.2;color:#1F5A8A">Trajectory logs</h3>
+<p style="font-size:32px;line-height:1.35;color:#44505C">So failures can be audited</p>
+</div>
+</div>
+</section>
+<section id="frameworks" data-transition="fade" style="background:#F6F3EC;color:#16202B;font-family:'IBM Plex Sans', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:48px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;font-weight:500;letter-spacing:2px;text-transform:uppercase;color:#B5411A">Block 4 · Safety and frameworks</p>
+<h2 style="font-family:'Source Serif 4', Georgia, serif;font-size:72px;font-weight:600;line-height:1.1">Frameworks</h2>
+</div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:32px">
+<div style="display:flex;flex-direction:column;gap:20px;background:#FFFDF8;padding:36px 40px;border:1px solid #DDD6C6;border-radius:16px">
+<h3 style="font-size:40px;font-weight:600;line-height:1.2;color:#1F5A8A">OpenHands</h3>
+<div style="display:flex;flex-direction:column;gap:8px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;font-weight:500;letter-spacing:2px;text-transform:uppercase;color:#5F6873">What it is for</p>
+<p style="font-size:32px;line-height:1.35;color:#16202B">Open-source software-development agent platform</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:8px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;font-weight:500;letter-spacing:2px;text-transform:uppercase;color:#5F6873">Notes</p>
+<p style="font-size:32px;line-height:1.35;color:#44505C">Sandboxed runtime; good reference for coding-agent architecture</p>
+</div>
+</div>
+<div style="display:flex;flex-direction:column;gap:20px;background:#FFFDF8;padding:36px 40px;border:1px solid #DDD6C6;border-radius:16px">
+<h3 style="font-size:40px;font-weight:600;line-height:1.2;color:#1F5A8A">LangGraph</h3>
+<div style="display:flex;flex-direction:column;gap:8px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;font-weight:500;letter-spacing:2px;text-transform:uppercase;color:#5F6873">What it is for</p>
+<p style="font-size:32px;line-height:1.35;color:#16202B">Graph-based orchestration of stateful agent workflows</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:8px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;font-weight:500;letter-spacing:2px;text-transform:uppercase;color:#5F6873">Notes</p>
+<p style="font-size:32px;line-height:1.35;color:#44505C">Explicit state, nodes, and edges make control flow inspectable</p>
+</div>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1664px;font-size:24px;color:#5F6873">Add version notes and comparisons as the course uses them.</p>
+</section>
+<section id="b4-discuss" data-transition="fade" style="background:#F6F3EC;color:#16202B;font-family:'IBM Plex Sans', Arial, sans-serif;padding:128px;display:flex;flex-direction:column;gap:48px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;font-weight:500;letter-spacing:2px;text-transform:uppercase;color:#B5411A">Block 4 · Safety and frameworks</p>
+<h2 style="font-family:'Source Serif 4', Georgia, serif;font-size:72px;font-weight:600;line-height:1.1">Discussion</h2>
+</div>
+<div style="display:flex;flex-direction:column">
+<div style="display:flex;gap:40px;align-items:baseline;padding:32px 0px;border-top:1px solid #CFC7B5">
+<p style="width:64px;font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;font-weight:500;color:#B5411A">Q1</p>
+<p style="flex:1;font-family:'Source Serif 4', Georgia, serif;font-size:40px;line-height:1.25">What is the smallest set of permissions a coding agent needs?</p>
+</div>
+<div style="display:flex;gap:40px;align-items:baseline;padding:32px 0px;border-top:1px solid #CFC7B5;border-bottom:1px solid #CFC7B5">
+<p style="width:64px;font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;font-weight:500;color:#B5411A">Q2</p>
+<p style="flex:1;font-family:'Source Serif 4', Georgia, serif;font-size:40px;line-height:1.25">How would you detect a prompt injection in a trajectory log?</p>
+</div>
+</div>
+</section>
+<section id="b5" data-transition="fade" style="background:#16202B;color:#F6F3EC;font-family:'IBM Plex Sans', Arial, sans-serif;padding:128px;display:flex;flex-direction:column;justify-content:space-between;gap:48px">
+<div style="display:flex;align-items:center;gap:40px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;font-weight:500;letter-spacing:2px;text-transform:uppercase;white-space:nowrap;color:#F0A070">Block 5 of 5</p>
+<div style="display:flex;gap:12px">
+<div style="width:96px;height:8px;background:#F0A070;border-radius:4px"></div>
+<div style="width:96px;height:8px;background:#F0A070;border-radius:4px"></div>
+<div style="width:96px;height:8px;background:#F0A070;border-radius:4px"></div>
+<div style="width:96px;height:8px;background:#F0A070;border-radius:4px"></div>
+<div style="width:96px;height:8px;background:#F0A070;border-radius:4px"></div>
+</div>
+</div>
+<div style="display:flex;flex-direction:column;gap:32px">
+<h1 style="font-family:'Source Serif 4', Georgia, serif;font-size:120px;font-weight:600;line-height:1.05">Human-agent interaction and search</h1>
+<p style="font-size:40px;line-height:1.3;color:#B9C4CF">Human-agent interaction · search methods · guest lectures</p>
+</div>
+</section>
+<section id="autonomy" data-transition="fade" style="background:#F6F3EC;color:#16202B;font-family:'IBM Plex Sans', Arial, sans-serif;padding:128px;display:flex;flex-direction:column;gap:48px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;font-weight:500;letter-spacing:2px;text-transform:uppercase;color:#B5411A">Block 5 · Human interaction and search</p>
+<h2 style="font-family:'Source Serif 4', Georgia, serif;font-size:72px;font-weight:600;line-height:1.1">Autonomy is a dial</h2>
+</div>
+<div style="display:flex;align-items:center;gap:20px">
+<p style="font-size:32px;white-space:nowrap;background:#FFFDF8;border:1px solid #CFC7B5;border-radius:12px;padding:20px 28px">Suggest only</p>
+<span style="width:44px;height:22px;background:#5F6873;display:block;flex:none;clip-path:polygon(0 35%,60% 35%,60% 0,100% 50%,60% 100%,60% 65%,0 65%)"></span>
+<p style="font-size:32px;white-space:nowrap;background:#FFFDF8;border:1px solid #CFC7B5;border-radius:12px;padding:20px 28px">Approve each step</p>
+<span style="width:44px;height:22px;background:#5F6873;display:block;flex:none;clip-path:polygon(0 35%,60% 35%,60% 0,100% 50%,60% 100%,60% 65%,0 65%)"></span>
+<p style="font-size:32px;white-space:nowrap;background:#FFFDF8;border:1px solid #CFC7B5;border-radius:12px;padding:20px 28px">Fully autonomous</p>
+</div>
+<div style="display:flex;flex-direction:column">
+<p style="font-size:32px;line-height:1.4;padding:22px 0px;border-top:1px solid #CFC7B5">Good agents show their plan and uncertainty so people can step in at the right moment</p>
+<p style="font-size:32px;line-height:1.4;padding:22px 0px;border-top:1px solid #CFC7B5">Over-asking is as costly as under-asking</p>
+<p style="font-size:32px;line-height:1.4;padding:22px 0px;border-top:1px solid #CFC7B5;border-bottom:1px solid #CFC7B5">Save clarifying questions for real ambiguity</p>
+</div>
+</section>
+<section id="search" data-transition="fade" style="background:#F6F3EC;color:#16202B;font-family:'IBM Plex Sans', Arial, sans-serif;padding:128px;display:flex;flex-direction:column;gap:48px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;font-weight:500;letter-spacing:2px;text-transform:uppercase;color:#B5411A">Block 5 · Human interaction and search</p>
+<h2 style="font-family:'Source Serif 4', Georgia, serif;font-size:72px;font-weight:600;line-height:1.1">Search at test time</h2>
+</div>
+<div style="display:flex;flex-direction:column">
+<div style="display:flex;gap:48px;padding:22px 0px;border-top:1px solid #CFC7B5">
+<h3 style="width:500px;font-size:32px;font-weight:600;line-height:1.4;color:#1F5A8A">Best-of-N</h3>
+<p style="flex:1;font-size:32px;line-height:1.4;color:#44505C">Sample several attempts, pick the best</p>
+</div>
+<div style="display:flex;gap:48px;padding:22px 0px;border-top:1px solid #CFC7B5">
+<h3 style="width:500px;font-size:32px;font-weight:600;line-height:1.4;color:#1F5A8A">Verifier-guided selection</h3>
+<p style="flex:1;font-size:32px;line-height:1.4;color:#44505C">Score attempts with a checker or model</p>
+</div>
+<div style="display:flex;gap:48px;padding:22px 0px;border-top:1px solid #CFC7B5;border-bottom:1px solid #CFC7B5">
+<h3 style="width:500px;font-size:32px;font-weight:600;line-height:1.4;color:#1F5A8A">Tree search</h3>
+<p style="flex:1;font-size:32px;line-height:1.4;color:#44505C">Explore alternative action sequences, with a value signal at each node</p>
+</div>
+</div>
+<p style="font-family:'Source Serif 4', Georgia, serif;font-size:40px;line-height:1.3;padding:8px 0px 8px 32px;border-left:6px solid #B5411A"><b>Trade-off:</b> more search gives better results at higher compute and latency cost.</p>
+</section>
+<section id="guests" data-transition="fade" style="background:#F6F3EC;color:#16202B;font-family:'IBM Plex Sans', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:48px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;font-weight:500;letter-spacing:2px;text-transform:uppercase;color:#B5411A">Block 5 · Human interaction and search</p>
+<h2 style="font-family:'Source Serif 4', Georgia, serif;font-size:72px;font-weight:600;line-height:1.1">Guest lectures</h2>
+</div>
+<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:32px">
+<div style="display:flex;flex-direction:column;gap:12px;background:#FFFDF8;padding:36px 32px;border:1px solid #DDD6C6;border-radius:16px">
+<div style="display:flex;flex-direction:column;min-height:96px">
+<h3 style="font-size:40px;font-weight:600;line-height:1.2;color:#1F5A8A">Karthik Narasimhan</h3>
+</div>
+<p style="font-size:32px;line-height:1.35;color:#44505C">[date] · [topic]</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:12px;background:#FFFDF8;padding:36px 32px;border:1px solid #DDD6C6;border-radius:16px">
+<div style="display:flex;flex-direction:column;min-height:96px">
+<h3 style="font-size:40px;font-weight:600;line-height:1.2;color:#1F5A8A">Sasha Rush</h3>
+</div>
+<p style="font-size:32px;line-height:1.35;color:#44505C">[date] · [topic]</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:12px;background:#FFFDF8;padding:36px 32px;border:1px solid #DDD6C6;border-radius:16px">
+<div style="display:flex;flex-direction:column;min-height:96px">
+<h3 style="font-size:40px;font-weight:600;line-height:1.2;color:#1F5A8A">Eric Wallace</h3>
+</div>
+<p style="font-size:32px;line-height:1.35;color:#44505C">[date] · [topic]</p>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1664px;font-size:24px;color:#5F6873">Speakers as listed for the course. Add dates and topics once confirmed.</p>
+</section>
+<section id="b5-discuss" data-transition="fade" style="background:#F6F3EC;color:#16202B;font-family:'IBM Plex Sans', Arial, sans-serif;padding:128px;display:flex;flex-direction:column;gap:48px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;font-weight:500;letter-spacing:2px;text-transform:uppercase;color:#B5411A">Block 5 · Human interaction and search</p>
+<h2 style="font-family:'Source Serif 4', Georgia, serif;font-size:72px;font-weight:600;line-height:1.1">Discussion</h2>
+</div>
+<div style="display:flex;flex-direction:column">
+<div style="display:flex;gap:40px;align-items:baseline;padding:32px 0px;border-top:1px solid #CFC7B5">
+<p style="width:64px;font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;font-weight:500;color:#B5411A">Q1</p>
+<p style="flex:1;font-family:'Source Serif 4', Georgia, serif;font-size:40px;line-height:1.25">When is asking the user cheaper than searching?</p>
+</div>
+<div style="display:flex;gap:40px;align-items:baseline;padding:32px 0px;border-top:1px solid #CFC7B5;border-bottom:1px solid #CFC7B5">
+<p style="width:64px;font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;font-weight:500;color:#B5411A">Q2</p>
+<p style="flex:1;font-family:'Source Serif 4', Georgia, serif;font-size:40px;line-height:1.25">What should a verifier check that the agent cannot fake?</p>
+</div>
+</div>
+</section>
+</div></div></div>
+<div class="notes" id="notes" hidden></div>
+</div>
+<script>
+(function(){
+var secs=[].slice.call(document.querySelectorAll('#deck section')),n=secs.length,cur=0;
+var deck=document.getElementById('deck'),frame=document.getElementById('frame'),sw=document.getElementById('sw');
+var jump=document.getElementById('jump'),count=document.getElementById('count'),notes=document.getElementById('notes');
+function fit(){
+  var cs=getComputedStyle(sw),w=sw.clientWidth-24,h=sw.clientHeight-24;
+  var k=Math.min(w/1920,h/1080);if(k<=0)k=.1;
+  deck.style.transform='scale('+k+')';frame.style.width=1920*k+'px';frame.style.height=1080*k+'px';
+}
+function show(i,push){
+  i=Math.max(0,Math.min(n-1,i));cur=i;
+  secs.forEach(function(s,j){s.classList.toggle('on',j===i)});
+  count.textContent=(i+1)+' / '+n;jump.value=i;
+  var a=secs[i].querySelector('aside');notes.textContent=a?a.textContent.trim():'No notes for this slide.';
+  if(push!==false)history.replaceState(null,'','#'+(i+1));
+}
+function go(d){show(cur+d)}
+document.getElementById('prev').onclick=function(){go(-1)};
+document.getElementById('next').onclick=function(){go(1)};
+jump.onchange=function(){show(+jump.value)};
+var nb=document.getElementById('nbtn');
+nb.onclick=function(){notes.hidden=!notes.hidden;nb.setAttribute('aria-pressed',String(!notes.hidden));fit()};
+function fs(){var d=document.documentElement;if(document.fullscreenElement){document.exitFullscreen()}else if(d.requestFullscreen){d.requestFullscreen().catch(function(){})}}
+document.getElementById('fs').onclick=fs;
+document.addEventListener('keydown',function(e){
+  if(e.target.tagName==='SELECT')return;
+  var k=e.key;
+  if(k==='ArrowRight'||k==='PageDown'||k===' '){e.preventDefault();go(1)}
+  else if(k==='ArrowLeft'||k==='PageUp'){e.preventDefault();go(-1)}
+  else if(k==='Home')show(0);else if(k==='End')show(n-1);
+  else if(k==='n'||k==='N')nb.click();else if(k==='f'||k==='F')fs();
+});
+var tx=null;
+frame.addEventListener('touchstart',function(e){tx=e.touches[0].clientX},{passive:true});
+frame.addEventListener('touchend',function(e){if(tx===null)return;var d=e.changedTouches[0].clientX-tx;if(Math.abs(d)>40)go(d<0?1:-1);tx=null});
+frame.addEventListener('click',function(e){var r=frame.getBoundingClientRect();go(e.clientX>r.left+r.width/2?1:-1)});
+window.addEventListener('resize',fit);
+if(document.fonts&&document.fonts.ready)document.fonts.ready.then(fit);
+var h=parseInt((location.hash||'').slice(1),10);
+fit();show(isNaN(h)?0:h-1,false);
+})();
+</script></body></html>
